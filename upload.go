@@ -11,7 +11,7 @@ import (
 	"path/filepath"
 )
 
-func (pinata *Pinata) uploadPinFile(url string, auth string, fileLoc string, name string, keyValues *map[string]string) ([]byte, error) {
+func (pinata *Pinata) uploadPinFile(fileLoc string, name string, keyValues *map[string]string) ([]byte, error) {
 	var body []byte = nil
 	payload := &bytes.Buffer{}
 
@@ -62,14 +62,14 @@ func (pinata *Pinata) uploadPinFile(url string, auth string, fileLoc string, nam
 
 	client := &http.Client{}
 
-	req, errReq := http.NewRequest(string(POST), url, payload)
+	req, errReq := http.NewRequest(string(POST), string(PINFILE), payload)
 
 	if errReq != nil {
 		err := fmt.Errorf("some error equaried %q", errReq.Error())
 		return body, err
 	}
 
-	req.Header.Add("Authorization", auth)
+	req.Header.Add("Authorization", "Bearer "+pinata.authentication)
 	req.Header.Add("Content-Type", writer.FormDataContentType())
 
 	res, errRes := client.Do(req)

@@ -50,11 +50,6 @@ type PinataRegion struct {
 	RegionId                string `json:"regionId"`
 }
 
-type PinataMetaData struct {
-	Name      string      `json:"name"`
-	KeyValues interface{} `json:"keyvalues"`
-}
-
 type PinataRow struct {
 	Id           string         `json:"id"`
 	IpfsPinHash  string         `json:"ipfs_pin_hash"`
@@ -62,13 +57,19 @@ type PinataRow struct {
 	UserId       string         `json:"user_id"`
 	DatePinned   string         `json:"date_pinned"`
 	DateUnpinned string         `json:"date_unpinned"`
-	MetaData     PinataMetaData `json:"metadata"`
+	MetaData     PinataMetadata `json:"metadata"`
 	Regions      []PinataRegion `json:"regions"`
 }
 
 type PinataBody struct {
 	Count int64       `json:"count"`
 	Rows  []PinataRow `json:"rows"`
+}
+
+type PinataUsageData struct {
+	PinCount                     int `json:"pin_count"`
+	PinSizeTotal                 int `json:"pin_size_total"`
+	PinSizeWithReplicationsTotal int `json:"pin_size_with_replications_total"`
 }
 
 func CreatePinata(auth string, cidVersion int8, wrapWithDirectory bool) *Pinata {
@@ -80,7 +81,7 @@ func CreatePinata(auth string, cidVersion int8, wrapWithDirectory bool) *Pinata 
 }
 
 func (pinata *Pinata) PinFile(fileLoc string, name string, keyvalues *map[string]string) string {
-	_, err := pinata.uploadPinFile(string(PINFILE), pinata.authentication, fileLoc, name, keyvalues)
+	_, err := pinata.uploadPinFile(fileLoc, name, keyvalues)
 
 	if err != nil {
 		return "Error Pin File"
@@ -127,8 +128,17 @@ func (pinata *Pinata) RemoveFiles(rows []PinataRow) {
 	pinata.Loading = false
 }
 
-func (pinata *Pinata) DataUsage() {
+func (pinata *Pinata) DataUsage() PinataUsageData {
+	bodyPinataUsage := &PinataUsageData{}
+	body, err := pinata.statUsage()
 
+	if err != nil {
+		fmt.Println("Error")
+	}
+
+	json.Unmarshal(body, bodyPinataUsage)
+
+	return *bodyPinataUsage
 }
 
 func (pinata *Pinata) QueryFiles(query string) PinataBody {
