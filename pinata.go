@@ -108,8 +108,14 @@ func (pinata *Pinata) LastPinByCID() {
 
 }
 
-func (pinata *Pinata) UpdateMetaData() {
+func (pinata *Pinata) UpdateMetaData(cid string, name string, keyValues *map[string]string) string {
+	_, err := pinata.updateMetadata(cid, name, keyValues)
 
+	if err != nil {
+		return "Error update metadata"
+	}
+
+	return "Successful update metadata"
 }
 
 func (pinata *Pinata) RemoveByHash(hash string) {
