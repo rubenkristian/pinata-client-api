@@ -3,18 +3,18 @@ package pinata
 import (
 	"encoding/json"
 	"fmt"
-	"io/ioutil"
+	"io"
 	"net/http"
 	"strings"
 )
 
 type PinataPayload struct {
-	PinataOptions string         `json:"pinataOptions`
+	PinataOptions string         `json:"pinataOptions"`
 	Metadata      PinataMetadata `json:"pinataMetadata"`
 	PinataContent interface{}    `json:"pinataContent"`
 }
 
-func uploadJson(url string, auth string, fileLoc string, pinataOptions string, pinataMetaData PinataMetadata, pinataContent interface{}) ([]byte, error) {
+func (pinata *Pinata) uploadJson(pinataOptions string, pinataMetaData PinataMetadata, pinataContent interface{}) ([]byte, error) {
 	method := "POST"
 
 	payloadPinata := &PinataPayload{
@@ -33,7 +33,7 @@ func uploadJson(url string, auth string, fileLoc string, pinataOptions string, p
 	payload := strings.NewReader(string(payloadPinataString))
 
 	client := &http.Client{}
-	req, err := http.NewRequest(method, url, payload)
+	req, err := http.NewRequest(method, string(PINJSON), payload)
 
 	if err != nil {
 		err := fmt.Errorf("cannot create new request %q", err.Error())
@@ -41,7 +41,7 @@ func uploadJson(url string, auth string, fileLoc string, pinataOptions string, p
 	}
 
 	req.Header.Add("Content-Type", "application/json")
-	req.Header.Add("Authorization", "Bearer "+auth)
+	req.Header.Add("Authorization", "Bearer "+pinata.authentication)
 
 	res, err := client.Do(req)
 	if err != nil {
@@ -50,7 +50,7 @@ func uploadJson(url string, auth string, fileLoc string, pinataOptions string, p
 	}
 	defer res.Body.Close()
 
-	body, err := ioutil.ReadAll(res.Body)
+	body, err := io.ReadAll(res.Body)
 	if err != nil {
 		err := fmt.Errorf("cannot read body response %q", err.Error())
 		return nil, err

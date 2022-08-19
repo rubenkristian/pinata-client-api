@@ -90,8 +90,14 @@ func (pinata *Pinata) PinFile(fileLoc string, name string, keyvalues *map[string
 	return "Successful Pin File"
 }
 
-func (pinata *Pinata) PinJSON() {
+func (pinata *Pinata) PinJSON(pinataOptions string, pinataMetaData PinataMetadata, pinataContent interface{}) string {
+	_, err := pinata.uploadJson(pinataOptions, pinataMetaData, pinataContent)
 
+	if err != nil {
+		return "Error Pin JSON"
+	}
+
+	return "Successful Pin JSON"
 }
 
 func (pinata *Pinata) PinByCID() {
