@@ -110,8 +110,14 @@ func (pinata *Pinata) PinByCID(cid string, pinataMetaData PinataMetadata) string
 	return "Successful Pin By CID"
 }
 
-func (pinata *Pinata) LastPinByCID() {
+func (pinata *Pinata) ListPinByCID() string {
+	body, err := pinata.listPinByCid()
 
+	if err != nil {
+		return err.Error()
+	}
+
+	return string(body)
 }
 
 func (pinata *Pinata) UpdateMetaData(cid string, name string, keyValues *map[string]string) string {
