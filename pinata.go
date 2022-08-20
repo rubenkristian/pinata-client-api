@@ -100,8 +100,14 @@ func (pinata *Pinata) PinJSON(pinataOptions string, pinataMetaData PinataMetadat
 	return "Successful Pin JSON"
 }
 
-func (pinata *Pinata) PinByCID() {
+func (pinata *Pinata) PinByCID(cid string, pinataMetaData PinataMetadata) string {
+	_, err := pinata.pinByCid(cid, pinataMetaData)
 
+	if err != nil {
+		return "Error Pin By CID"
+	}
+
+	return "Successful Pin By CID"
 }
 
 func (pinata *Pinata) LastPinByCID() {

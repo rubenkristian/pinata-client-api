@@ -5,11 +5,57 @@ import (
 	"encoding/json"
 	"fmt"
 	"io"
+	"io/ioutil"
 	"mime/multipart"
 	"net/http"
 	"os"
 	"path/filepath"
+	"strings"
 )
+
+type PayloadPinByCid struct {
+	HashToPin string         `json:"hashToPin"`
+	MetaData  PinataMetadata `json:"pinataMetadata"`
+}
+
+func (pinata *Pinata) pinByCid(cid string, pinataMetadata PinataMetadata) ([]byte, error) {
+	payloadPinCid := &PayloadPinByCid{
+		HashToPin: cid,
+		MetaData:  pinataMetadata,
+	}
+
+	payloadPinCidString, err := json.MarshalIndent(payloadPinCid, "", "\t")
+
+	if err != nil {
+		return nil, err
+	}
+
+	payload := strings.NewReader(string(payloadPinCidString))
+
+	client := &http.Client{}
+	req, err := http.NewRequest(string(POST), string(PINBYCID), payload)
+
+	if err != nil {
+		return nil, err
+	}
+	req.Header.Add("Authorization", "Bearer "+pinata.authentication)
+	req.Header.Add("Content-Type", "application/json")
+
+	res, err := client.Do(req)
+	if err != nil {
+		fmt.Println(err)
+		return nil, err
+	}
+	defer res.Body.Close()
+
+	body, err := ioutil.ReadAll(res.Body)
+	if err != nil {
+		fmt.Println(err)
+		return nil, err
+	}
+
+	return body, nil
+}
 
 func (pinata *Pinata) uploadPinFile(fileLoc string, name string, keyValues *map[string]string) ([]byte, error) {
 	var body []byte = nil
